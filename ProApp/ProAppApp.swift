@@ -11,7 +11,10 @@ import SwiftUI
 struct ProAppApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationStack{
+                LoginView()
+            }
+            
         }
     }
 }
