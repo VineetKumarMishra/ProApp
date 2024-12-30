@@ -9,11 +9,9 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct LoginView: View {
-    @State private var email: String = ""
-    @State private var password: String = ""
-    @State private var errorMessage: String = ""
     @State private var isLoggedIn: Bool = false
-    @State private var showAlert: Bool = false
+    
+    @StateObject private var viewModel = LoginViewModel(authService: AuthenticationService())
     
     var body: some View {
         ZStack{
@@ -28,14 +26,14 @@ struct LoginView: View {
                     .foregroundStyle(Color.orange)
                 
                 
-                TextField("Please enter email...", text: $email)
+                TextField("Please enter email...", text: $viewModel.email)
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(20)
                     .padding()
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
-                TextField("Please enter password..", text: $password)
+                TextField("Please enter password..", text: $viewModel.password)
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(20)
@@ -43,7 +41,7 @@ struct LoginView: View {
                     .keyboardType(.emailAddress)
                     .autocapitalization(.none)
                 Button {
-                    handleLogin()
+                    viewModel.login()
                 } label: {
                     
                     Text("Login")
@@ -59,12 +57,12 @@ struct LoginView: View {
                 Spacer()
 
             }
-            .alert("ProApp", isPresented: $showAlert) {
+            .alert("ProApp", isPresented: $viewModel.showAlert) {
                 Button("OK", role: .cancel) {}
             } message: {
-                Text(errorMessage)
+                Text(viewModel.loginError ?? "")
             }
-            .navigationDestination(isPresented: $isLoggedIn) {
+            .navigationDestination(isPresented: $viewModel.isLoginSuccessful) {
                 DashboardView()
             }
         }
@@ -73,32 +71,7 @@ struct LoginView: View {
 
 extension LoginView{
     
-    func getAlert() -> Alert {
-        Alert(title: Text(errorMessage))
-        
-    }
-    func handleLogin() {
-            // Simple validation
-            isLoggedIn = true
-            if email.isEmpty || password.isEmpty {
-                errorMessage = "Email and password are required."
-                showAlert = true
-                
-            } else if !isValidEmail(email) {
-                errorMessage = "Please enter a valid email address."
-                showAlert = true
-            } else {
-                errorMessage = ""
-                isLoggedIn = true
-                // Handle successful login (e.g., API call)
-            }
-        }
-        
-        func isValidEmail(_ email: String) -> Bool {
-            // Basic email validation regex
-            let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
-            return NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: email)
-        }
+    
     
 }
 
